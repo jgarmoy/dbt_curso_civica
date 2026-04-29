@@ -1,0 +1,407 @@
+version: 2
+
+models:
+  - name: stg_postgre_db__addresses
+    config:
+      materialized: view
+      contract:
+        enforced: true
+    description: >
+      Staging de la tabla addresses
+    columns:
+      - name: address_id
+        data_type: varchar
+        description: >
+          Id de la dirección
+        data_tests:
+          - unique
+          - not_null
+
+      - name: zipcode
+        data_type: integer
+        description: >
+          Código postal de la dirección.
+        data_tests:
+          - not_null
+
+      - name: country
+        data_type: varchar
+        description: >
+          Ciudad
+        data_tests:
+          - not_null
+
+      - name: address
+        data_type: varchar
+        description: >
+          Nombre de la dirección
+        data_tests:
+          - not_null
+
+      - name: state
+        data_type: varchar
+        description: >
+          Estado donde se encuentra la dirreción
+        data_tests:
+          - not_null
+
+      - name: _fivetran_deleted
+        data_type: datetime
+        description: >
+          Fecha de borrado de fivetran
+
+      - name: _fivetran_synced
+        data_type: datetime
+        description: >
+          Fecha de sincronización de fivetran
+        data_tests:
+          - not_null
+
+  - name: stg_postgre_db__orderitems
+    config:
+      materialized: view
+      contract:
+        enforced: true
+    description: >
+      Staging para la tabla orderitems
+    columns:
+      - name: order_id
+        data_type: varchar
+        description: >
+          Id del pedido
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('stg_postgre_db__orders')
+                field: order_id
+          
+      - name: product_id
+        data_type: varchar
+        description: >
+          Foreing key a la id del producto
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('stg_postgre_db__products')
+                field: product_id
+          
+      - name: quantity
+        data_type: integer
+        description: >
+          Cantidad del producto
+        data_tests:
+          - not_null
+          
+      - name: _fivetran_deleted
+        data_type: datetime
+        description: >
+          Fecha de borrado de fivetran
+
+      - name: _fivetran_synced
+        data_type: datetime
+        description: >
+          Fecha de sincronización de fivetran
+        data_tests:
+          - not_null
+  
+  - name: stg_postgre_db__orders
+    config:
+      materialized: view 
+      contract: 
+        enforced: true
+    description: >
+      Staging para la tabla orderitems
+    columns:
+      - name: address_id
+        data_type: varchar
+        description: >
+          Foreing key, id de la dirección
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('stg_postgre_db__addresses')
+                field: address_id
+          
+      - name: created_at
+        data_type: datetime
+        description: >
+          Fecha de cuando fue creado
+        data_tests:
+          - not_null
+          
+      - name: delivered_at
+        data_type: datetime
+        description: >
+          Fecha de la entrega
+
+      - name: estimated_delivery_at
+        data_type: datetime
+        description: >
+          Fecha de cuando se estima entregar el pedido
+
+      - name: order_cost
+        data_type: float
+        description: >
+          Coste del pedido
+        data_tests:
+          - not_null
+          
+      - name: order_id
+        data_type: varchar
+        description: >
+          Primary key del pedido
+        data_tests:
+          - unique
+          - not_null
+          
+      - name: order_total
+        data_type: float
+        description: >
+          Total del pedido
+        data_tests:
+          - not_null
+          
+      - name: promo_id
+        data_type: varchar
+        description: >
+          Id de la promoción
+        data_tests:
+          - relationships:
+              arguments: 
+                to: ref('stg_postgre_db__promos')
+                field: promo_id
+
+      - name: shipping_cost
+        data_type: float
+        description: >
+          Coste del transporte
+        data_tests:
+          - not_null
+          
+      - name: shipping_service
+        data_type: varchar
+        description: > 
+          Empresa que se ha encargado del transporte
+        data_tests:
+          - not_null
+          
+      - name: status
+        data_type: varchar
+        description: >
+          Estado en el que se encuentra el reparto del pedido
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['delivered', 'shipped', 'preparing']
+
+      - name: tracking_id
+        data_type: varchar
+        description: >
+          Id del tracking
+
+      - name: user_id
+        data_type: varchar
+        description: >
+          Foreing key a la id del usuario.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('stg_postgre_db__user')
+                field: user_id
+
+      - name: _fivetran_deleted
+        data_type: datetime
+        description: >
+          Fecha de borrado de fivetran
+
+      - name: _fivetran_synced
+        data_type: datetime
+        description: >
+          Fecha de sincronización de fivetran
+        data_tests:
+          - not_null
+
+  - name: stg_postgre_db__products
+    config: 
+      materialized: view
+      contract: 
+        enforced: true
+    description: >
+      Staging para los productos
+    columns:
+      - name: inventory
+        data_type: integer
+        description: >
+          Inventario de los que queda del producto
+        data_tests:
+          - not_null
+
+      - name: name
+        data_type: varchar
+        description: >
+          Nombre del producto.
+        data_tests:
+          - not_null
+          
+      - name: price
+        data_type: float
+        description: >
+          Precio del producto
+        data_tests:
+          - not_null
+          
+      - name: product_id
+        data_type: varchar
+        description: >
+          Clave primaria del producto
+        data_tests:
+          - not_null
+          - unique
+          
+      - name: _fivetran_deleted
+        data_type: datetime
+        description: >
+          Fecha de borrado de fivetran
+
+      - name: _fivetran_synced
+        data_type: datetime
+        description: >
+          Fecha de sincronización de fivetran
+        data_tests:
+          - not_null
+
+  - name: stg_postgre_db__promos
+    config: 
+      materialized: view
+      contract: 
+        enforced: true
+    description: >
+      Staging de promos
+    columns:
+      - name: discount
+        data_type: integer
+        description: >
+          Porcentaje que se aplica en el descuento
+        data_tests:
+          - not_null
+          
+      - name: promo_id
+        data_type: varchar
+        description: >
+          Primary key de las promociones
+        data_tests:
+          - not_null
+          - unique
+          
+      - name: status
+        data_type: varchar
+        description: >
+          Estado de la promoción. Si está activa o no.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['inactive', 'active']
+
+      - name: _fivetran_deleted
+        data_type: datetime
+        description: >
+          Fecha de borrado de fivetran
+
+      - name: _fivetran_synced
+        data_type: datetime
+        description: >
+          Fecha de sincronización de fivetran
+        data_tests:
+          - not_null
+
+  - name: stg_postgre_db__user
+    config: 
+      materialized: view
+      contract: 
+        enforced: true
+    description: >
+      Staging de los usuarios
+    columns:
+      - name: address_id
+        data_type: varchar
+        description: >
+          Clave foranea, id de la dirección.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('stg_postgre_db__addresses')
+                field: address_id
+
+      - name: created_at
+        data_type: datetime
+        description: >
+          Fecha de cuando fue creado
+        data_tests:
+          - not_null
+
+      - name: email
+        data_type: varchar
+        description: >
+          Email del usuario
+        data_tests:
+          - not_null
+          - unique
+          
+      - name: first_name
+        data_type: varchar
+        description: >
+          Nombre del usuario
+        data_tests:
+          - not_null
+          
+      - name: last_name
+        data_type: varchar
+        description: >
+          Apellidos del usuario
+        data_tests:
+          - not_null
+
+      - name: phone_number
+        data_type: varchar
+        description: >
+          Número de teléfono
+        data_tests:
+          - not_null
+          - unique
+          
+      - name: total_orders
+        data_type: integer
+        description: >
+          Total de pedidos del usuario
+
+      - name: updated_at
+        data_type: datetime
+        description: >
+          Fecha que el usuario hizo una modificación
+
+      - name: user_id
+        data_type: varchar
+        description: >
+          Clave primaria del usuario
+        data_tests:
+          - unique
+          - not_null
+          
+      - name: _fivetran_deleted
+        data_type: datetime
+        description: >
+          Fecha de borrado de fivetran
+
+      - name: _fivetran_synced
+        data_type: datetime
+        description: >
+          Fecha de sincronización de fivetran
+        data_tests:
+          - not_null
