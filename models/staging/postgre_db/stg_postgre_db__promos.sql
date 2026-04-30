@@ -1,3 +1,9 @@
+{{ config(
+    materialized = 'incremental',
+    unique_key = 'promo_id',
+    incremental_strategy = 'merge'
+)}}
+
 with 
 
 source as (
@@ -20,3 +26,7 @@ renamed as (
 )
 
 select * from renamed
+
+{% if is_incremental()%}
+    where _fivetran_synced > (select max(_fivetran_synced) from {{ this }})
+{% endif %}
