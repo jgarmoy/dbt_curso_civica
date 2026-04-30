@@ -60,6 +60,7 @@ models:
   - name: stg_postgre_db__orderitems
     config:
       materialized: view
+      on_schema_change: append_new_columns
       contract:
         enforced: true
     description: >
@@ -229,6 +230,7 @@ models:
   - name: stg_postgre_db__products
     config: 
       materialized: view
+      on_schema_change: append_new_columns
       contract: 
         enforced: true
     description: >
@@ -278,6 +280,7 @@ models:
   - name: stg_postgre_db__promos
     config: 
       materialized: view
+      on_schema_change: append_new_columns
       contract: 
         enforced: true
     description: >
